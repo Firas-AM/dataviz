@@ -4,7 +4,7 @@ scikit-learn
 nbconvert
 pandas
 seaborn
-matplotlib.pyplot
+matplotlib
 random
 WordCloud
 param
