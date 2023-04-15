@@ -1,1 +1,1 @@
-web: panel serve --address="0.0.0.0" --port=$PORT iris_kmeans.ipynb --allow-websocket-origin=dv-project.herokuapp.com
+web: panel serve --address="0.0.0.0" --port=$PORT iris_kmeans.ipynb --allow-websocket-origin=dv-project2.herokuapp.com
