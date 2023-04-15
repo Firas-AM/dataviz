@@ -319,6 +319,6 @@ app = pn.Column(
 
 app.servable()
 
-# app.show()
+app.show()
 
 
