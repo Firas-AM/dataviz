@@ -1,0 +1,11 @@
+panel
+hvplot
+scikit-learn
+nbconvert
+pandas
+seaborn
+matplotlib.pyplot
+random
+WordCloud
+param
+altair
