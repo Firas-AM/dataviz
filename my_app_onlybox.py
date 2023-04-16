@@ -266,9 +266,10 @@ description = pn.pane.Markdown("""
 <h3 style="color: #4a4a4a; font-family: Arial, sans-serif;">Main Elements</h3>
 <ol style="color: #4a4a4a; font-family: Arial, sans-serif;">
     <li>An interactive box plot that shows the salary distribution by position, seniority, company size, and age.</li>
-    <li>Pie charts displaying the proportion of male and female job positions.</li>
+    <li>Pie charts displaying the distribution in jobs for males and females.</li>
     <li>A word cloud showing the main technologies and programming languages in the dataset.</li>
     <li>A violin chart illustrating the salary distribution for the top 6 most populated company types by gender.</li>
+    <li>Bubble and Bar Charts showing the relationship between age, salary, and total years of experience for selected positions in the tech industry</li>
 </ol>
 """)
 
@@ -305,20 +306,96 @@ violin_chart_description = pn.pane.Markdown("""
 </p>
 """)
 
-# Add the descriptions and graphs to the layout
+
+bubble_bar_chart_description = pn.pane.Markdown("""
+<h3 style="color: #4a4a4a; font-family: Arial, sans-serif;">Bubble and Bar Charts</h3>
+<p style="color: #4a4a4a; font-family: Arial, sans-serif;">
+    These interactive charts show the relationship between age, salary, and total years of experience for selected positions in the tech industry. The bubble chart displays individual data points, where the size of each bubble represents the total years of experience. You can filter the data by selecting one or more positions on the bar chart, which displays the count of employees in each position.
+</p>
+<p style="color: #4a4a4a; font-family: Arial, sans-serif;">
+    To explore the data further, you can use the interval selection tool on the bubble chart's x-axis to select a specific age range. This will filter the bar chart, showing only the count of employees within the selected age range.
+</p>
+""")
+
+
+# Define the color scale
+scale = alt.Scale(
+    domain=[
+        "Software Engineer",
+        "Backend Developer",
+        "Frontend Developer",
+        "QA Engineer",
+        "Data Scientist",
+    ],
+    range=["#e7ba52", "#a7a7a7", "#aec7e8", "#1f77b4", "#9467bd"],
+)
+color = alt.Color("Position:N", scale=scale)
+
+# Create multiple selection on the bar chart
+click = alt.selection_multi(encodings=["color"])
+# Create interval selection on the bubble chart
+brush = alt.selection_interval(encodings=["x"])
+
+# Create a bubble chart
+points = (
+    alt.Chart(data)
+    .mark_point()
+    .encode(
+        alt.X("Age:Q", title="Age"),
+        alt.Y(
+            "Yearly brutto salary (without bonus and stocks) in EUR:Q",
+            title="Salary",
+            scale=alt.Scale(domain=[0, 200000]),
+        ),
+        color=color,
+        size=alt.Size("Total years of experience:Q", scale=alt.Scale(range=[5, 200])),
+    )
+    .properties(width=800, height=300)
+    .transform_filter(click)
+    .add_selection(brush)
+)
+
+# Filter the data to include only the desired positions
+filtered_data = data[
+    data["Position"].isin(
+        [
+            "Software Engineer",
+            "Backend Developer",
+            "Frontend Developer",
+            "QA Engineer",
+            "Data Scientist",
+        ]
+    )
+]
+
+# Create a bar chart with filtered data
+bars = (
+    alt.Chart(filtered_data)
+    .mark_bar()
+    .encode(
+        x="count()",
+        y="Position:N",
+        color=alt.condition(click, color, alt.value("lightgrey")),
+    )
+    .properties(width=800)
+    .add_selection(click)
+    .transform_filter(brush)
+)
+
+# Add the new charts to the layout
 app = pn.Column(
-    description, 
+    description,
     box_plot_description,
     pie_chart_description,
     pn.Row(widgets, chart),
     word_cloud_description,
     wordcloud_image,
     violin_chart_description,
-    violin_chart_image
+    violin_chart_image,
+    bubble_bar_chart_description,
+    points & bars
 )
 
 app.servable()
 
 app.show()
-
-
